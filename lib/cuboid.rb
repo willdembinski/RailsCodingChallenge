@@ -1,6 +1,8 @@
 
 class Cuboid
-  
+	def initialize(w,h)
+		@width, @height = w, h
+	end
   #BEGIN public methods that should be your starting point
 
   def move_to!(x, y, z)
