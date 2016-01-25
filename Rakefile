@@ -11,6 +11,7 @@ task :environment do
 end
 
 task :default => [:environment, :spec] do
+
   
 end
 
