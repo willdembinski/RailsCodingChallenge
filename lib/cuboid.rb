@@ -6,12 +6,14 @@ class Hash
 end
 
 class Cuboid
-  attr_reader :origin, :dimensions, :vertices, :container
+  attr_reader :origin, :dimensions, :vertices, :container,:maxes,:mins
 
 	def initialize(config = {})
+    @maxes = {x:0,y:0,z:0}
+    @mins = {x:0,y:0,z:0}
     @dimensions = config[:dimensions]
     @origin = config[:origin]
-    @container = config[:container]
+    @container = config[:container] || nil
     update
     self
 	end
@@ -23,10 +25,14 @@ class Cuboid
     update
     self
   end
-  
-  #returns true if the two cuboids intersect each other.  False otherwise.
-  def intersects?(other)
 
+  def intersects?(other) #found this idea on stack overflow - makes sense to rule out where you can't collide, might be a more efficient way
+    @maxes[:x] > other.mins[:x] &&
+    @mins[:x] < other.maxes[:x] &&
+    @maxes[:y] > other.mins[:y] &&
+    @mins[:y] < other.maxes[:y] &&
+    @maxes[:z] > other.mins[:z] &&
+    @mins[:z] < other.maxes[:z]
   end
 
   def rotate!(ax) #assumes clockwise 90 deg - looking toward lower vals, meaning the plain's true 'origin'
@@ -49,11 +55,25 @@ class Cuboid
 
   def update
     setVerts
-    checkAndShift
+    setMaxAndMins
+    reposition
+  end
+
+  def setMaxAndMins
+    coords = {x:[],y:[],z:[]}
+    @vertices.each do |key,hash|
+      hash.each do |ax,val|
+        coords[ax].push(val)
+      end
+    end
+    coords.each do |ax,set|
+      @maxes[ax] = set.max
+      @mins[ax] = set.min
+    end
   end
 
   def setVerts #This is assuming the 'origin' is a vertex - not the center of the cuboid
-    #starting on bottom surface, going clockwise, assuming 1st is origing
+    #starting on bottom surface, going clockwise, assuming 1st is origin
     vert1 = @origin
     vert2 = {x:vert1[:x],y:vert1[:y],z:vert1[:z]+@dimensions[:width]}
     vert3 = {x:vert2[:x]+@dimensions[:length],y:vert2[:y],z:vert2[:z]}
@@ -76,20 +96,18 @@ class Cuboid
     }
   end
 
-  def checkAndShift
-    puts "checkingShift..."
-    
-  end
-
-  def shift(axis,units)
-    
+  def reposition
+    unless @container.nil?
+      @maxes.each do |key,val|
+        if @maxes[key] > @container.maxes[key]
+          self.move_to!({key => (@origin[key]-(@maxes[key] - @container.maxes[key]))}) #not as declarative as I would like
+        end
+      end
+      @mins.each do |key,val|
+        if @mins[key] < @container.mins[key]
+          self.move_to!({key => @origin[key] + (@container.mins[key] - @mins[key])}) #not as declarative as I would like
+        end
+      end
+    end
   end
 end
-
-
-
-
-
-
-
-
