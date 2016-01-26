@@ -28,11 +28,11 @@ class Cuboid
 
   def intersects?(other) #found this idea on stack overflow - makes sense to rule out where you can't collide, might be a more efficient way
     @maxes[:x] > other.mins[:x] &&
-    @mins[:x] < other.maxes[:x] &&
     @maxes[:y] > other.mins[:y] &&
-    @mins[:y] < other.maxes[:y] &&
     @maxes[:z] > other.mins[:z] &&
-    @mins[:z] < other.maxes[:z]
+    @mins[:x] < other.maxes[:x] &&
+    @mins[:y] < other.maxes[:y] &&
+    @mins[:z] < other.maxes[:z] 
   end
 
   def rotate!(ax) #assumes clockwise 90 deg - looking toward lower vals, meaning the plain's true 'origin'
